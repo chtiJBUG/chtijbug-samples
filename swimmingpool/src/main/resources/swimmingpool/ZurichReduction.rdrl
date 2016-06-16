@@ -1,0 +1,37 @@
+package swimmingpool;
+
+import org.chtijbug.example.swimmingpool.SeasonType;
+import java.math.BigDecimal;
+import org.chtijbug.example.swimmingpool.Address;
+import org.chtijbug.example.swimmingpool.Subscription;
+import org.chtijbug.example.swimmingpool.Person;
+import org.chtijbug.example.swimmingpool.SeasonType;
+import org.chtijbug.example.swimmingpool.Price;
+import org.chtijbug.example.swimmingpool.Quote;
+import org.chtijbug.example.swimmingpool.Gender;
+import org.chtijbug.example.swimmingpool.PriceType;
+import org.chtijbug.example.swimmingpool.Period;
+import org.chtijbug.example.swimmingpool.CalculatedAttribute;
+import org.chtijbug.example.swimmingpool.BaseElement;
+import java.util.Collection;
+import java.lang.Integer;
+import java.lang.Double;
+import java.math.MathContext;
+import java.math.RoundingMode;
+
+rule "ZurichReduction"
+	ruleflow-group "reduction"
+	dialect "mvel"
+	when
+		pper : Person( sprice : standardPrice != null  && > 0B )
+		not (pprice : Price( description == "ZurichReduction" ) and Person( this == pper , priceList contains ( pprice ) )) 
+		Address( cityName == "zurich"  || == "Zurich"  || == "Zürich" )
+	then
+		Price nprice = new Price();
+		nprice.setDescription( "ZurichReduction" );
+		nprice.setAmount( sprice.divide(new BigDecimal("-10.0"),BigDecimal.ROUND_HALF_DOWN) );
+		nprice.setPriceType( PriceType.promotion );
+		insert( nprice );
+		pper.addPrice( nprice );
+		update( pper );
+end

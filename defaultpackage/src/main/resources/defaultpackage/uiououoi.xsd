@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://xml.netbeans.org/schema/concatenation"
+    xmlns:tns="http://xml.netbeans.org/schema/concatenation"
+    elementFormDefault="qualified">
+    <xsd:complexType name="inputComplexType">
+        <xsd:sequence>
+            <xsd:element name="parameter1" type="xsd:string"></xsd:element>
+            <xsd:element name="parameter2" type="xsd:string"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="outputComplexType">
+        <xsd:sequence>
+            <xsd:element name="parameter" type="xsd:string"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:element name="input" type="tns:inputComplexType"></xsd:element>
+    <xsd:element name="output" type="tns:outputComplexType"></xsd:element>
+</xsd:schema>

@@ -1,0 +1,45 @@
+package swimmingpool;
+
+import org.chtijbug.example.swimmingpool.SeasonType;
+import java.math.BigDecimal;
+import org.chtijbug.example.swimmingpool.Address;
+import org.chtijbug.example.swimmingpool.Subscription;
+import org.chtijbug.example.swimmingpool.Person;
+import org.chtijbug.example.swimmingpool.SeasonType;
+import org.chtijbug.example.swimmingpool.Price;
+import org.chtijbug.example.swimmingpool.Quote;
+import org.chtijbug.example.swimmingpool.Gender;
+import org.chtijbug.example.swimmingpool.PriceType;
+import org.chtijbug.example.swimmingpool.Period;
+import org.chtijbug.example.swimmingpool.CalculatedAttribute;
+import org.chtijbug.example.swimmingpool.BaseElement;
+import java.util.Collection;
+import java.lang.Integer;
+import java.lang.Double;
+import java.math.MathContext;
+import java.math.RoundingMode;
+
+rule "CalculateTotal"
+	ruleflow-group "subscription"
+	dialect "mvel"
+	when
+		tot : BigDecimal( ) from accumulate ( Price( aa : amount != null , priceType != PriceType.definitive ),
+			init( BigDecimal res = new BigDecimal("0.0") ),
+			action( res = res.add(aa) ),
+			reverse( res = res.subtract(aa) ),
+			result( res )
+) 
+		not (Price( priceType == PriceType.definitive )) 
+		tot2 : BigDecimal( ) from accumulate ( Person( sp : standardPrice != null  && != -1B ),
+			init( BigDecimal res = new BigDecimal("0.0") ),
+			action( res = res.add(sp) ),
+			reverse( res = res.subtract(sp) ),
+			result( res )
+) 
+	then
+		Price fact0 = new Price();
+		fact0.setAmount( tot.add(tot2) );
+		fact0.setPriceType( PriceType.definitive );
+		fact0.setDescription( "Final Price" );
+		insert( fact0 );
+end

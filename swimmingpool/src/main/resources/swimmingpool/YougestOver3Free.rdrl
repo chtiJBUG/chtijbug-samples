@@ -1,0 +1,44 @@
+package swimmingpool;
+
+import org.chtijbug.example.swimmingpool.SeasonType;
+import java.math.BigDecimal;
+import org.chtijbug.example.swimmingpool.Address;
+import org.chtijbug.example.swimmingpool.Subscription;
+import org.chtijbug.example.swimmingpool.Person;
+import org.chtijbug.example.swimmingpool.SeasonType;
+import org.chtijbug.example.swimmingpool.Price;
+import org.chtijbug.example.swimmingpool.Quote;
+import org.chtijbug.example.swimmingpool.Gender;
+import org.chtijbug.example.swimmingpool.PriceType;
+import org.chtijbug.example.swimmingpool.Period;
+import org.chtijbug.example.swimmingpool.CalculatedAttribute;
+import org.chtijbug.example.swimmingpool.BaseElement;
+import java.util.Collection;
+import java.lang.Integer;
+import java.lang.Double;
+import java.math.MathContext;
+import java.math.RoundingMode;
+
+rule "YougestOver3Free"
+	ruleflow-group "promotion"
+	dialect "mvel"
+	when
+		ll : Collection (size >1 ) from collect ( Person( age >= 3.0 ))
+		minAge : Double( ) from accumulate ( Person( aage : age >= 3.0 ),
+			min(aage)) 
+		not (CalculatedAttribute( key == "YougestOver3Free" )) 
+		aPerson : Person( age == minAge , sprice : standardPrice)
+	then
+		Price aPrice = new Price();
+		aPrice.setDescription( "YougestOver3Free" );
+		aPrice.setPriceType( PriceType.promotion );
+		aPrice.setAmount( -sprice );
+		insert( aPrice );
+		aPerson.addPrice( aPrice );
+		CalculatedAttribute aCalc = new CalculatedAttribute();
+		aCalc.setKey( "YougestOver3Free" );
+		aCalc.setStringValue( "Personne is free" );
+		insert( aCalc );
+		aPerson.getCalculatedAttributeList().add(aCalc);
+		update( aPerson );
+end
